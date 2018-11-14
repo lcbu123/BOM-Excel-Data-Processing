@@ -7,3 +7,6 @@
 
 執行畫面：
     https://github.com/lcbu123/BOM-Excel-Data-Processing/wiki
+
+執行檔：
+    https://github.com/lcbu123/BOM-Excel-Data-Processing/blob/master/BomDataProcessing.exe
