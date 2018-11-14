@@ -9,4 +9,4 @@
 
 執行檔案：https://github.com/lcbu123/BOM-Excel-Data-Processing/raw/master/BomDataProcessing.exe
 
-執行檔下載連結在 VirusTtal 的掃毒結果：https://www.virustotal.com/url/48d09e1d108e41b299e4442a3d7e75a72e921124f805d74ebc01db3184add28f/analysis/1542180168/
+執行檔 BomDataProcessing.exe 下載連結在 VirusTotal 的掃毒結果：https://www.virustotal.com/url/48d09e1d108e41b299e4442a3d7e75a72e921124f805d74ebc01db3184add28f/analysis/1542180168/
