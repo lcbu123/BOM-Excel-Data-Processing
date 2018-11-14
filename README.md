@@ -5,3 +5,5 @@
 
 使用 Visual Studio 2015 C# WPF 引用 OLEDB 撰寫而成。
 
+執行畫面：
+    https://github.com/lcbu123/BOM-Excel-Data-Processing/wiki
