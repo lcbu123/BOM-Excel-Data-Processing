@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -13,6 +12,31 @@ namespace BomDataProcessing
         public MainWindow()
         {
             InitializeComponent();
+            excel.ReadIn.LoadFileCompleted += Excel_LoadFileCompleted;
+            excel.WriteOut.SaveFileCompleted += Excel_SaveFileCompleted;
+            UnLockUI(false);
+        }
+
+        private void UnLockUI(bool value)
+        {
+            btnExcel_Export.IsEnabled = value;
+            comBoxExcelSheet.IsEnabled = value;
+            listBoxZone.IsEnabled = value;
+            dgExcelContent.IsEnabled = value;
+        }
+
+        private void Excel_LoadFileCompleted(object sender, EventArgs e)
+        {
+            bomDataSet = new BomDataSet(((ExcelHelper.ReadEvent)e).newDS);
+            comBoxExcelSheet.ItemsSource = null;
+            comBoxExcelSheet.ItemsSource = bomDataSet.TableNames;
+            comBoxExcelSheet.SelectedIndex = 0;
+            UnLockUI(true);
+        }
+
+        private void Excel_SaveFileCompleted(object sender, EventArgs e)
+        {
+            MessageBox.Show("Data has been stored to " + excel.SavedFileName, "File Saving is OK.");
         }
 
         private void btnExcel_Click(object sender, RoutedEventArgs e)
@@ -20,20 +44,11 @@ namespace BomDataProcessing
             switch (((Button)sender).Name.Split('_')[1])
             {
                 case "Load":
-                    DataSet newSet = excel.ReadIn.Data;
-                    if (newSet != null)
-                    {
-                        bomDataSet = new BomDataSet(newSet);
-                        comBoxExcelSheet.ItemsSource = null;
-                        comBoxExcelSheet.ItemsSource = bomDataSet.TableNames;
-                        comBoxExcelSheet.SelectedIndex = 0;
-                    }
+                    excel.ReadIn.Data();
                     break;
                 case "Export":
-                    if (bomDataSet != null && excel.WriteOut.Data(bomDataSet.SelectVisibleTable(comBoxExcelSheet.SelectedItem.ToString())) != null)
-                    {
-                        MessageBox.Show("Data has been stored to " + excel.SavedFileName, "File Saving is OK.");
-                    }
+                    string sheetName = comBoxExcelSheet.SelectedItem.ToString();
+                    excel.WriteOut.Data(bomDataSet, sheetName);
                     break;
             }
         }
@@ -48,7 +63,7 @@ namespace BomDataProcessing
             for (int i = 0; i < dgExcelContent.Columns.Count; i++)
             {
                 string columnName = bomDataSet.Tables[sheetName].Columns[i].ColumnName;
-                dgExcelContent.Columns[i].Visibility = bomDataSet.ColumnVisibility[sheetName][columnName] ? Visibility.Visible : Visibility.Hidden;
+                dgExcelContent.Columns[i].Visibility = bomDataSet.GetColumnVisibility(sheetName, columnName);
             }
         }
 
@@ -57,17 +72,14 @@ namespace BomDataProcessing
             CheckBox cBox = (CheckBox)sender;
             int excelColIndx = Convert.ToInt32(cBox.Tag);
             string sheetName = comBoxExcelSheet.SelectedItem.ToString();
-            string columName = cBox.Content.ToString(); ;
-            if (cBox.IsChecked == true)
-            {
-                dgExcelContent.Columns[excelColIndx].Visibility = Visibility.Visible;
-                bomDataSet.ColumnVisibility[sheetName][columName] = true;
-            }
-            else
-            {
-                dgExcelContent.Columns[excelColIndx].Visibility = Visibility.Hidden;
-                bomDataSet.ColumnVisibility[sheetName][columName] = false;
-            }
+            string columName = cBox.Content.ToString();
+            SetVisibility_DataGrid(dgExcelContent.Columns[excelColIndx], cBox.IsChecked.Value);
+            bomDataSet.SetColumnVisibility(sheetName, columName, cBox.IsChecked.Value);
+        }
+
+        void SetVisibility_DataGrid(DataGridColumn column, bool value)
+        {
+            column.Visibility = value ? Visibility.Visible : Visibility.Hidden;
         }
     }
 }

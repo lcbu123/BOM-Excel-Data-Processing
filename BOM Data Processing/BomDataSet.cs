@@ -1,12 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Windows;
 
 namespace BomDataProcessing
 {
     class BomDataSet : DataSet
     {
-        List<string> _tableNames = new List<string>();
+        public BomDataSet(DataSet dataSet)
+        {
+            this._tableNames = new List<string>();
+            this._columnVisibility = new Dictionary<string, Dictionary<string, bool>>();
+            this.Tables.CollectionChanged += TablesCollectionChanged;
+            this.Merge(dataSet);
+        }
+
+        List<string> _tableNames;
         internal List<string> TableNames
         {
             get
@@ -15,12 +24,21 @@ namespace BomDataProcessing
             }
         }
 
-        internal Dictionary<string, Dictionary<string, bool>> ColumnVisibility = new Dictionary<string, Dictionary<string, bool>>();
+        Dictionary<string, Dictionary<string, bool>> _columnVisibility;
 
-        public BomDataSet(DataSet dataSet)
+        internal void SetColumnVisibility(string sheetName, string columnName, bool value)
         {
-            this.Tables.CollectionChanged += TablesCollectionChanged;
-            this.Merge(dataSet);
+            _columnVisibility[sheetName][columnName] = value;
+        }
+
+        internal bool IsColumnVisible(string sheetName, string columnName)
+        {
+            return _columnVisibility[sheetName][columnName];
+        }
+
+        internal Visibility GetColumnVisibility(string sheetName, string columnName)
+        {
+            return _columnVisibility[sheetName][columnName] ? Visibility.Visible : Visibility.Hidden;
         }
 
         internal List<string> ColumnNames(string tableName)
@@ -31,13 +49,13 @@ namespace BomDataProcessing
             return columnNames;
         }
 
-        internal DataTable SelectVisibleTable(string tableName)
+        internal DataTable GetTableWithVisibleColumns(string tableName)
         {
             DataTable table = Tables[tableName].Copy();
-            int columnCount = ColumnVisibility[tableName].Count;
+            int columnCount = _columnVisibility[tableName].Count;
             for (int i = columnCount - 1; i >= 0; i--)
             {
-                if (ColumnVisibility[tableName][table.Columns[i].ColumnName] == false)
+                if (_columnVisibility[tableName][table.Columns[i].ColumnName] == false)
                 {
                     table.Columns.RemoveAt(i);
                 }
@@ -48,15 +66,15 @@ namespace BomDataProcessing
         void TablesCollectionChanged(object sender, CollectionChangeEventArgs e)
         {
             _tableNames.Clear();
-            ColumnVisibility.Clear();
+            _columnVisibility.Clear();
 
             for (int i = 0; i < Tables.Count; i++)
             {
                 _tableNames.Add(Tables[i].TableName);
-                ColumnVisibility.Add(Tables[i].TableName, new Dictionary<string, bool>());
+                _columnVisibility.Add(Tables[i].TableName, new Dictionary<string, bool>());
                 for (int j = 0; j < Tables[i].Columns.Count; j++)
                 {
-                    ColumnVisibility[Tables[i].TableName].Add(Tables[i].Columns[j].ColumnName, true);
+                    _columnVisibility[Tables[i].TableName].Add(Tables[i].Columns[j].ColumnName, true);
                 }
             }
         }

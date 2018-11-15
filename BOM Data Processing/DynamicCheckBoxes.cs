@@ -39,7 +39,7 @@ namespace BomDataProcessing
                 {
                     ExcelColumnName = columnNames[i],
                     ExcelColumnIndex = i,
-                    CheckBoxIsChecked = bomDataSet.ColumnVisibility[sheetName][columnNames[i]]
+                    CheckBoxIsChecked = bomDataSet.IsColumnVisible(sheetName, columnNames[i])
                 });
             }
         }

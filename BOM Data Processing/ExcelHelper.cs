@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.Text;
@@ -8,13 +9,18 @@ namespace BomDataProcessing
 {
     partial class ExcelHelper
     {
+        public class ReadEvent : EventArgs
+        {
+            public DataSet newDS;
+        }
+
         public string SavedFileName
         {
             get
             { return savedExcelFileName; }
         }
-        internal static string openedExcelFileName = "";
-        internal static string savedExcelFileName = "";
+        static string openedExcelFileName = "";
+        static string savedExcelFileName = "";
         public Import ReadIn;
         public Export WriteOut;
 
@@ -41,7 +47,7 @@ namespace BomDataProcessing
 
         #endregion
 
-        object InOutOLEDB(bool optInOut, DataTable table = null, string fileName = "")
+        public object InOutOLEDB(bool optInOut, DataTable table = null, string fileName = "")
         {
             object value = null;
             if (fileName.Length == 0)

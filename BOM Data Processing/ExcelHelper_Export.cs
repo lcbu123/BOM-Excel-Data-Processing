@@ -8,12 +8,20 @@ namespace BomDataProcessing
     {
         public class Export
         {
-            public Nullable<bool> Data(DataTable table)
+            public event EventHandler SaveFileCompleted;
+
+            public Nullable<bool> Data(BomDataSet bomDataSet, string sheetName)
             {
-                return (Nullable<bool>)new ExcelHelper().InOutOLEDB(false, table, OpenExcelFileDialog());
+                DataTable table = bomDataSet.GetTableWithVisibleColumns(sheetName);
+                var result = (Nullable<bool>)new ExcelHelper().InOutOLEDB(false, table, OpenExcelFileDialog());
+                if (result.Value)
+                {
+                    SaveFileCompleted(this, new EventArgs());
+                }
+                return result;
             }
 
-            string OpenExcelFileDialog()
+        string OpenExcelFileDialog()
             {
                 SaveFileDialog saveFile = new SaveFileDialog()
                 {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Data;
 
 namespace BomDataProcessing
@@ -7,11 +8,16 @@ namespace BomDataProcessing
     {
         public class Import
         {
-            public DataSet Data
+            public event EventHandler LoadFileCompleted;
+
+            public void Data()
             {
-                get
+                var result = (DataSet)new ExcelHelper().InOutOLEDB(true, null, OpenExcelFileDialog());
+                if (result != null)
                 {
-                    return (DataSet)new ExcelHelper().InOutOLEDB(true, null, OpenExcelFileDialog());
+                    ReadEvent e = new ReadEvent();
+                    e.newDS = result;
+                    LoadFileCompleted(this, e);
                 }
             }
 
